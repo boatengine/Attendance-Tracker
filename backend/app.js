@@ -7,10 +7,12 @@ import attendanceRoute from "./routes/attendance.js";
 import employeeRoute from "./routes/employee.js";
 import locationRoute from "./routes/location.js";
 import reportRoute from "./routes/report.js";
-
+import cors from "cors";
 const app = express();
 
 const PORT = process.env.PORT || 3001;
+
+app.use(cors());
 
 app.use(cookieParser());
 app.use(express.json());
