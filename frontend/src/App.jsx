@@ -1,10 +1,33 @@
-import { Flex, Text, Button } from "@radix-ui/themes";
+import { createBrowserRouter } from "react-router";
+import { RouterProvider } from "react-router/dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Admin from "./pages/admin/Admin";
+import Report from "./pages/admin/Report";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Login />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+  },
+  {
+    path: "/admin",
+    element: <Admin />,
+  },
+  {
+    path: "/admin/report",
+    element: <Report />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+]);
 
 export default function App() {
-  return (
-    <Flex direction="column" gap="2">
-      <Text>Hello from Radix Themes :)</Text>
-      <Button>Let's go</Button>
-    </Flex>
-  );
+  return <RouterProvider router={router} />;
 }
