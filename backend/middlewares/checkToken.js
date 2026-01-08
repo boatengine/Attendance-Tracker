@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-exports.auth = (req, res, next) => {
+const checkToken = (req, res, next) => {
   // check have authorization
   if (!req.cookies)
     return res.status(400).json({
@@ -16,7 +16,7 @@ exports.auth = (req, res, next) => {
     });
 
   // check ว่าตรงกับ secret ไหม ?
-  jwt.verify(reqtoken, process.env.SECRET_JWT, (err, decoded) => {
+  jwt.verify(reqtoken, process.env.JWT_SECRET, (err, decoded) => {
     if (err)
       return res.status(403).json({
         message: "Invalid token",
@@ -25,3 +25,5 @@ exports.auth = (req, res, next) => {
     next();
   });
 };
+
+export default checkToken;
