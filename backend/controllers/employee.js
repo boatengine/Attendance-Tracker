@@ -87,3 +87,68 @@ export const getEmployeeById = async (req, res) => {
     res.status(500).json({ message: "server error" });
   }
 };
+
+export const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { full_name, email, department, position, auth_location_id } =
+      req.body;
+
+    // check exist
+    const [exist] = await pool.query("SELECT id FROM employees WHERE id = ?", [
+      id,
+    ]);
+
+    if (exist.length === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    await pool.query(
+      `UPDATE employees
+       SET full_name = ?,
+           email = ?,
+           department = ?,
+           position = ?
+           auth_location_id = ?
+       WHERE id = ?`,
+      [
+        full_name || null,
+        email || null,
+        department || null,
+        position || null,
+        auth_location_id || null,
+        id,
+      ]
+    );
+
+    const [rows] = await pool.query(
+      `SELECT id, employee_id, full_name, email, department, position, auth_location_id, created_at
+       FROM employees WHERE id = ?`,
+      [id]
+    );
+
+    res.json({ success: true, employee: rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: "server error" });
+  }
+};
+
+export const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [exist] = await pool.query("SELECT id FROM employees WHERE id = ?", [
+      id,
+    ]);
+
+    if (exist.length === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    await pool.query("DELETE FROM employees WHERE id = ?", [id]);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "server error" });
+  }
+};
