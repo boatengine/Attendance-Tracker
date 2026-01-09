@@ -28,7 +28,7 @@
 1. โคลนโปรเจกต์จาก GitHub:
 
 ```bash
-git clone https://github.com/boatenine/Attendance-tracker.git
+git clone https://github.com/boatengine/Attendance-tracker.git
 ```
 
 2. ติดตั้ง dependencies ของ frontend:
