@@ -2,7 +2,8 @@ import pool from "../services/db.js";
 
 export const createEmployee = async (req, res) => {
   try {
-    const { employee_id, pin, full_name, email, department } = req.body;
+    const { employee_id, pin, full_name, email, department, auth_location_id } =
+      req.body;
     console.log(req.body);
 
     if (!employee_id || !pin || !full_name) {
@@ -22,11 +23,19 @@ export const createEmployee = async (req, res) => {
     }
 
     // insert
+
     const [result] = await pool.query(
       `INSERT INTO employees
-       (employee_id, pin, full_name, email, department)
-       VALUES (?, ?, ?, ?, ?)`,
-      [employee_id, pin, full_name, email || null, department || null]
+       (employee_id, pin, full_name, email, department, auth_location_id)
+       VALUES (?, ?, ?, ?, ?,?)`,
+      [
+        employee_id,
+        pin,
+        full_name,
+        email || null,
+        department || null,
+        auth_location_id || null,
+      ]
     );
 
     const [rows] = await pool.query("SELECT * FROM employees WHERE id = ?", [
