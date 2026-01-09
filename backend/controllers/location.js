@@ -92,3 +92,24 @@ export const getAllLocations = async (req, res) => {
     res.status(500).json({ error: "server error" });
   }
 };
+
+export const deleteLocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [exist] = await pool.query(
+      "SELECT id FROM authorized_locations WHERE id = ?",
+      [id]
+    );
+
+    if (exist.length === 0) {
+      return res.status(404).json({ error: "Locations not found" });
+    }
+
+    await pool.query("DELETE FROM authorized_locations WHERE id = ?", [id]);
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "server error" });
+  }
+};
