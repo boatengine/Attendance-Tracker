@@ -27,9 +27,9 @@ export const clock = async (req, res) => {
 
       await pool.query(
         `INSERT INTO attendance_records
-        ( auth_location_id, employee_id, session_type, date, clock_in, clock_in_location, face_in )
-        VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
-        [auth_location_id, id, session_type, today, location, face_data]
+        ( auth_location_id, employee_id, session_type, date, clock_in, clock_in_location, face_in,clock_in_verified )
+        VALUES (?, ?, ?, ?, NOW(), ?, ?, ?)`,
+        [auth_location_id, id, session_type, today, location, face_data, "true"]
       );
 
       return res.json({ message: "clock in success" });
@@ -49,10 +49,10 @@ export const clock = async (req, res) => {
         `UPDATE attendance_records
          SET clock_out = NOW(),
              clock_out_location = ?,
-             face_out = ?
- 
+             face_out = ?,
+            clock_out_verified = ?
          WHERE id = ?`,
-        [location, face_data, rows[0].id]
+        [location, face_data, "true", rows[0].id]
       );
 
       return res.json({ message: "clock out success" });

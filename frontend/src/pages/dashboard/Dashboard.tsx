@@ -336,7 +336,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* ปุ่มดึงข้อมูล */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
               <Button
                 onClick={handleLogout}
                 disabled={loading}
@@ -396,7 +396,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-red-500 text-muted-foreground">
                       ยังไม่มีข้อมูล
                     </p>
                   )}
@@ -422,8 +422,11 @@ export default function Dashboard() {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      ยังไม่มีข้อมูล
+                    <p className="text-sm text-red-500">
+                      ยังไม่มีข้อมูล{" "}
+                      <span className="font-semibold">
+                        (กรุณากดดึงตำแหน่งของฉัน)
+                      </span>
                     </p>
                   )}
                 </CardContent>

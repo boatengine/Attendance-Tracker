@@ -40,12 +40,11 @@ export default function Admin() {
     full_name: "",
     email: "",
     department: "",
-    location_id: "",
+    auth_location_id: "",
   });
 
   //form location
   const [locationForm, setLocationForm] = useState({
-    id: "",
     name: "",
     latitude: "",
     longitude: "",
@@ -162,7 +161,7 @@ export default function Admin() {
           full_name: "",
           email: "",
           department: "",
-          location_id: "",
+          auth_location_id: "",
         });
         fetchEmployees();
       }
@@ -177,14 +176,17 @@ export default function Admin() {
   const handleAddLocation = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://api.example.com/locations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(locationForm),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_ENDPOINT}/api/location`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(locationForm),
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         setLocationForm({
-          id: "",
           name: "",
           latitude: "",
           longitude: "",
@@ -203,11 +205,12 @@ export default function Admin() {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://api.example.com/locations/${editingLocation.id}`,
+        `${import.meta.env.VITE_ENDPOINT}/api/location`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingLocation),
+          credentials: "include",
         }
       );
       if (response.ok) {
@@ -222,13 +225,39 @@ export default function Admin() {
   };
 
   const handleDeleteLocation = async (id: number) => {
-    if (!confirm("คุณต้องการลบสถานที่นี้หรือไม่?")) return;
+    if (!confirm("แน่ใจ?")) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`https://api.example.com/locations/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_ENDPOINT}/api/location/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        fetchLocations();
+      }
+    } catch (err) {
+      setError("ไม่สามารถลบสถานที่ได้");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteEmp = async (id: number) => {
+    if (!confirm("แน่ใจ?")) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_ENDPOINT}/api/employee/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         fetchLocations();
       }
@@ -458,6 +487,13 @@ export default function Admin() {
                         <p className="text-sm text-muted-foreground">
                           {emp.employee_id} - {emp.department}
                         </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteEmp(emp.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
                       </div>
                     ))
                   )}
@@ -561,7 +597,7 @@ export default function Admin() {
                             radius_meters: e.target.value,
                           })
                     }
-                    placeholder="150"
+                    placeholder="200"
                   />
                 </div>
                 {editingLocation ? (

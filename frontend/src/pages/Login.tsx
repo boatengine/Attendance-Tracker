@@ -46,9 +46,10 @@ export default function Login() {
 
       if (response.ok) {
         console.log("Login success:", data);
+
         navi("/dashboard");
       } else {
-        setError(data.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        setError(data.message || "employee id หรือ pinไม่ถูก");
       }
     } catch (err) {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
@@ -87,7 +88,7 @@ export default function Login() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="empid">อีเมล</Label>
+            <Label htmlFor="empid">Employee​ ID</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
