@@ -6,7 +6,7 @@ export const clock = async (req, res) => {
     const { auth_location_id, session_type, action, face_data, location } =
       req.body;
     const { id } = req.user;
-
+    console.log(req.body);
     if (!auth_location_id || !session_type || !action || !location) {
       return res.status(400).json({ message: "missing data" });
     }
@@ -50,12 +50,45 @@ export const clock = async (req, res) => {
          SET clock_out = NOW(),
              clock_out_location = ?,
              face_out = ?
+ 
          WHERE id = ?`,
         [location, face_data, rows[0].id]
       );
 
       return res.json({ message: "clock out success" });
     }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "server error" });
+  }
+};
+
+export const getAttendanceStatus = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const [rows] = await pool.query(
+      `SELECT 
+        session_type,
+        clock_in,
+        clock_out,
+        clock_in_location,
+        clock_out_location,
+      clock_in_verified,
+        clock_out_verified  
+       FROM attendance_records
+       WHERE employee_id = ?
+         AND date = ?
+       ORDER BY session_type`,
+      [id, today]
+    );
+
+    return res.json({
+      date: today,
+      records: rows,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "server error" });

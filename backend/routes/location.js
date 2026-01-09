@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 router.get("/", checkToken, getAllLocations);
-router.get("/:id", checkToken, getLocationById);
+router.get("/:id", getLocationById);
 router.post("/", checkToken, createLocation);
 router.put("/", checkToken, editLocation);
 

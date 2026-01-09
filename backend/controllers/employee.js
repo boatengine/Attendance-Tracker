@@ -71,7 +71,7 @@ export const getEmployeeById = async (req, res) => {
     const { id } = req.params;
 
     const [rows] = await pool.query(
-      `SELECT id, employee_id, full_name, email, department, position, created_at
+      `SELECT id, employee_id, full_name, email, department, position,auth_location_id, created_at
        FROM employees
        WHERE id = ?`,
       [id]
