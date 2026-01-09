@@ -2,17 +2,13 @@ import pool from "../services/db.js";
 
 export const createEmployee = async (req, res) => {
   try {
-    const { employee_id, pin, full_name, email, department, position } =
-      req.body;
+    const { employee_id, pin, full_name, email, department } = req.body;
+    console.log(req.body);
 
     if (!employee_id || !pin || !full_name) {
       return res.status(400).json({
         error: "Employee ID, PIN, and full name are required",
       });
-    }
-
-    if (pin.length !== 6) {
-      return res.status(400).json({ error: "PIN must be 6 digits" });
     }
 
     // check dupli employee_id
@@ -28,16 +24,9 @@ export const createEmployee = async (req, res) => {
     // insert
     const [result] = await pool.query(
       `INSERT INTO employees
-       (employee_id, pin, full_name, email, department, position)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        employee_id,
-        pin,
-        full_name,
-        email || null,
-        department || null,
-        position || null,
-      ]
+       (employee_id, pin, full_name, email, department)
+       VALUES (?, ?, ?, ?, ?)`,
+      [employee_id, pin, full_name, email || null, department || null]
     );
 
     const [rows] = await pool.query("SELECT * FROM employees WHERE id = ?", [
@@ -46,7 +35,7 @@ export const createEmployee = async (req, res) => {
 
     res.json({ success: true, employee: rows[0] });
   } catch (err) {
-    // console.error("Create employee error:", err);
+    console.error("Create employee error:", err);
     res.status(500).json({ message: "server error" });
   }
 };
