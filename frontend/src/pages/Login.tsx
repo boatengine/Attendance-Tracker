@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { LogIn, Mail, Lock, Eye, EyeOff, Loader } from "lucide-react";
+import {
+  LogIn,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader,
+  CircleQuestionMark,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +30,14 @@ export default function Login() {
   const [error, setError] = useState("");
   const navi = useNavigate();
 
+  const handleLink = () => {
+    window.open(
+      "https://drive.google.com/file/d/1xGqSecJxFq-OqvN7F9UGzA9I2gwGZnmz/view?usp=sharing",
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     setError("");
@@ -39,7 +55,7 @@ export default function Login() {
             emp_id: empid,
             pin: password,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -152,6 +168,18 @@ export default function Login() {
                 เข้าสู่ระบบ
               </>
             )}
+          </Button>
+          <Button
+            onClick={handleLink}
+            className="w-full"
+            variant="outline"
+            size="lg"
+            disabled={loading}
+          >
+            <>
+              <CircleQuestionMark className="mr-2 h-4 w-4" />
+              วิธีการใช้งาน
+            </>
           </Button>
         </CardFooter>
       </Card>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   MapPin,
   CheckCircle,
@@ -39,6 +39,10 @@ interface AttendanceRecord {
   clock_out_verified: boolean | null;
 }
 
+interface User {
+  auth_location_id: number;
+  is_admin: number;
+}
 export default function Dashboard() {
   const [apiLocation, setApiLocation] = useState<Location | null>(null);
   const [userLocation, setUserLocation] = useState<Location | null>(null);
@@ -49,12 +53,12 @@ export default function Dashboard() {
   const [showCamera, setShowCamera] = useState<boolean>(false);
   const [image, setImage] = useState<string | null>(null);
   const [sendStatus, setSendStatus] = useState<SendStatus>("");
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [clockSt, setClockSt] = useState<string>("");
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [selectedSession, setSelectedSession] = useState<SessionType | null>(
-    null
+    null,
   );
 
   const navi = useNavigate();
@@ -65,7 +69,7 @@ export default function Dashboard() {
   const fetchAttendanceStatus = async () => {
     const res = await fetch(
       `${import.meta.env.VITE_ENDPOINT}/api/attendance/status`,
-      { credentials: "include" }
+      { credentials: "include" },
     );
 
     const data = await res.json();
@@ -77,14 +81,13 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  const getSessionRecord = (session) =>
+  const getSessionRecord = (session: string) =>
     attendance.find((r) => r.session_type === session);
-
   const calculateDistance = (
     lat1: number,
     lon1: number,
     lat2: number,
-    lon2: number
+    lon2: number,
   ): number => {
     const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
@@ -109,7 +112,7 @@ export default function Dashboard() {
         `${import.meta.env.VITE_ENDPOINT}/api/auth/logout`,
         {
           method: "POST",
-        }
+        },
       );
 
       const data = await response.json();
@@ -129,7 +132,7 @@ export default function Dashboard() {
   const fetchLocationFromAPI = async (): Promise<void> => {
     setLoading(true);
     setError("");
-
+    if (!user) return;
     try {
       const response = await fetch(
         `${import.meta.env.VITE_ENDPOINT}/api/location/${
@@ -137,7 +140,7 @@ export default function Dashboard() {
         }`,
         {
           credentials: "include",
-        }
+        },
       );
       const data = await response.json();
 
@@ -179,7 +182,7 @@ export default function Dashboard() {
       (err: GeolocationPositionError) => {
         setError("ไม่สามารถดึง Location ได้: " + err.message);
         setLoading(false);
-      }
+      },
     );
   };
 
@@ -188,7 +191,7 @@ export default function Dashboard() {
       apiLoc.lat,
       apiLoc.lng,
       userLoc.lat,
-      userLoc.lng
+      userLoc.lng,
     );
 
     setDistance(dist.toFixed(2));
@@ -246,42 +249,49 @@ export default function Dashboard() {
   };
 
   const submitClock = async (): Promise<void> => {
-    if (!image || !userLocation) return;
+    if (!image || !userLocation || !user || !selectedSession || !clockSt) {
+      setSendStatus("error");
+      return;
+    }
 
     setSendStatus("กำลังส่งข้อมูล...");
 
     try {
-      // console.log(image);
-      console.log(userLocation);
-      let datad = {
+      const payload = {
         auth_location_id: user.auth_location_id,
         session_type: selectedSession,
         action: clockSt,
         face_data: image,
-        location: (userLocation.lat, userLocation.lng),
+        location: {
+          lat: userLocation.lat,
+          lng: userLocation.lng,
+        },
       };
-      console.log(datad);
+
       const response = await fetch(
         `${import.meta.env.VITE_ENDPOINT}/api/attendance/clock`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datad),
+          body: JSON.stringify(payload),
           credentials: "include",
-        }
+        },
       );
 
       setSendStatus(response.ok ? "success" : "error");
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } catch {
+
+      if (response.ok) {
+        setTimeout(() => window.location.reload(), 3000);
+      }
+    } catch (err) {
       setSendStatus("error");
     }
   };
 
   useEffect(() => {
-    fetchLocationFromAPI();
+    if (user) {
+      fetchLocationFromAPI();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -298,7 +308,7 @@ export default function Dashboard() {
           {
             method: "GET",
             credentials: "include",
-          }
+          },
         );
 
         if (!res.ok) {
@@ -321,6 +331,7 @@ export default function Dashboard() {
 
     checkAuth();
   }, [navi]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -468,14 +479,17 @@ export default function Dashboard() {
                   {["morning", "lunch", "afternoon", "evening"].map((s) => {
                     const record = getSessionRecord(s);
 
-                    const completed = record?.clock_in && record?.clock_out;
+                    const completed = Boolean(
+                      record?.clock_in && record?.clock_out,
+                    );
 
                     return (
                       <Button
                         key={s}
                         variant={selectedSession === s ? "default" : "outline"}
                         disabled={completed}
-                        onClick={() => setSelectedSession(s)}
+                        onClick={() => setSelectedSession(s as SessionType)}
+                        // onClick={() => console.log(s)}
                       >
                         {s === "morning" && "เช้า"}
                         {s === "lunch" && "กลางวัน"}
