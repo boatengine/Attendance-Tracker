@@ -44,7 +44,7 @@ export const clock = async (req, res) => {
       if (rows[0].clock_out) {
         return res.status(400).json({ message: "already clocked out" });
       }
-
+      const xx2 = `${location.lat},${location.lng}`;
       await pool.query(
         `UPDATE attendance_records
          SET clock_out = NOW(),
@@ -52,7 +52,7 @@ export const clock = async (req, res) => {
              face_out = ?,
             clock_out_verified = ?
          WHERE id = ?`,
-        [location, face_data, "true", rows[0].id],
+        [xx2, face_data, "true", rows[0].id],
       );
 
       return res.json({ message: "clock out success" });
