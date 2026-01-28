@@ -1,9 +1,11 @@
+create database attendance_tracker;
+
 -- MySQL dump 10.13  Distrib 8.0.43, for macos15 (arm64)
 --
 -- Host: localhost    Database: attendance_tracker
 -- ------------------------------------------------------
 -- Server version	8.0.42
-create database attendance_tracker;
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -107,7 +109,7 @@ CREATE TABLE `employees` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `employee_id` (`employee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -116,7 +118,7 @@ CREATE TABLE `employees` (
 
 LOCK TABLES `employees` WRITE;
 /*!40000 ALTER TABLE `employees` DISABLE KEYS */;
-INSERT INTO `employees` VALUES (7,'EMP002','111111','nalanta rakthai','nalanta@gmail.com','Hr',NULL,NULL,3,1,0,'2026-01-09 05:34:50','2026-01-09 05:34:50'),(8,'ADMIN001','123456','admin','admin@gmail.com',NULL,NULL,NULL,NULL,1,1,'2026-01-09 11:18:38','2026-01-09 11:18:52');
+INSERT INTO `employees` VALUES (8,'ADMIN001','123456','admin','admin@gmail.com',NULL,NULL,NULL,NULL,1,1,'2026-01-09 11:18:38','2026-01-09 11:18:52'),(9,'EMP001','123456','nalanta phuket','nalantaphuket@gmail.com','HR',NULL,NULL,4,1,0,'2026-01-28 04:21:46','2026-01-28 04:21:46');
 /*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -129,4 +131,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-09 18:20:48
+-- Dump completed on 2026-01-28 11:52:44

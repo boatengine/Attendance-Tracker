@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   MapPin,
@@ -22,19 +22,85 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router";
 
+/* ===================== TYPES ===================== */
+
+interface Employee {
+  id: number;
+  employee_id: string;
+  full_name: string;
+  email: string;
+  department: string;
+  auth_location_id?: number;
+}
+
+interface Location {
+  id: number;
+  name: string;
+  latitude: string;
+  longitude: string;
+  radius_meters: string;
+}
+
+interface RecordItem {
+  id: number;
+  full_name: string;
+  emp_code: string;
+  department: string;
+  session_type: string;
+  clock_in: string;
+  clock_out?: string;
+  clock_in_verified: string;
+  clock_out_verified?: string;
+}
+
+interface ReportSummary {
+  totalRecords: number;
+  totalHours: number;
+  verifiedRecords: number;
+  missedClockOuts: number;
+}
+
+interface User {
+  id: number;
+  role: string;
+  email: string;
+}
+
+interface EmployeeForm {
+  employee_id: string;
+  pin: string;
+  full_name: string;
+  email: string;
+  department: string;
+  auth_location_id: string;
+}
+
+interface LocationForm {
+  name: string;
+  latitude: string;
+  longitude: string;
+  radius_meters: string;
+}
+
+/* ===================== COMPONENT ===================== */
+
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("employees");
-  const [employees, setEmployees] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [records, setRecords] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<
+    "employees" | "locations" | "reports" | "logout"
+  >("employees");
+
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [records, setRecords] = useState<RecordItem[]>([]);
+  const [summary, setSummary] = useState<ReportSummary | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  console.log(user);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+
   const navi = useNavigate();
-  // Employee Form
-  const [employeeForm, setEmployeeForm] = useState({
-    //
+
+  const [employeeForm, setEmployeeForm] = useState<EmployeeForm>({
     employee_id: "",
     pin: "",
     full_name: "",
@@ -43,16 +109,17 @@ export default function Admin() {
     auth_location_id: "",
   });
 
-  //form location
-  const [locationForm, setLocationForm] = useState({
+  const [locationForm, setLocationForm] = useState<LocationForm>({
     name: "",
     latitude: "",
     longitude: "",
     radius_meters: "",
   });
-  const [editingLocation, setEditingLocation] = useState(null);
 
-  // tab control
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+
+  /* ===================== EFFECTS ===================== */
+
   useEffect(() => {
     if (activeTab === "employees") {
       fetchEmployees();
@@ -65,137 +132,100 @@ export default function Admin() {
       handleLogout();
     }
   }, [activeTab]);
-  const handleLogout = async () => {
-    setLoading(true);
-    setError("");
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/auth/logout`,
-        {
-          method: "POST",
-        }
-      );
+  useEffect(() => {
+    const checkAuth = async (): Promise<void> => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_ENDPOINT}/api/auth/me`,
+          { credentials: "include" },
+        );
 
-      const data = await response.json();
+        if (!res.ok) throw new Error("Unauthorized");
 
-      if (response.ok) {
-        navi("/login");
-      } else {
-        setError(data.message);
+        const data: User = await res.json();
+        setUser(data);
+      } catch {
+        navi("/login", { replace: true });
       }
-    } catch (err) {
-      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const fetchEmployees = async () => {
+    };
+
+    checkAuth();
+  }, [navi]);
+
+  /* ===================== API ===================== */
+
+  const fetchEmployees = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/employee`
-      );
-      const data = await response.json();
+      const res = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/employee`);
+      const data = await res.json();
       setEmployees(data.employees);
-    } catch (err) {
+    } catch {
       setError("ไม่สามารถโหลดข้อมูลพนักงานได้");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchLocations = async () => {
+  const fetchLocations = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/location`,
-        { credentials: "include" }
-      );
-      const data = await response.json();
+      const res = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/location`, {
+        credentials: "include",
+      });
+      const data = await res.json();
       setLocations(data.locations);
-      console.log(data.locations);
-    } catch (err) {
+    } catch {
       setError("ไม่สามารถโหลดข้อมูลสถานที่ได้");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchReports = async () => {
+  const fetchReports = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/report`,
-        { credentials: "include" }
-      );
-      const data = await response.json();
+      const res = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/report`, {
+        credentials: "include",
+      });
+      const data = await res.json();
       setRecords(data.records);
       setSummary(data.summary);
-    } catch (err) {
+    } catch {
       setError("ไม่สามารถโหลดรายงานได้");
-      // ข้อมูลทดสอบ
     } finally {
       setLoading(false);
     }
   };
 
-  // Employee Actions
-  const handleAddEmployee = async () => {
+  /* ===================== ACTIONS ===================== */
+
+  const handleAddEmployee = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/employee`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(employeeForm),
-          credentials: "include",
-        }
-      );
-      if (response.ok) {
-        setEmployeeForm({
-          employee_id: "",
-          pin: "",
-          full_name: "",
-          email: "",
-          department: "",
-          auth_location_id: "",
-        });
-        fetchEmployees();
-      }
-    } catch (err) {
-      setError("ไม่สามารถเพิ่มพนักงานได้");
+      await fetch(`${import.meta.env.VITE_ENDPOINT}/api/employee`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(employeeForm),
+      });
+      fetchEmployees();
     } finally {
       setLoading(false);
     }
   };
 
-  // Location Actions
-  const handleAddLocation = async () => {
+  const handleAddLocation = async (): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/location`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(locationForm),
-          credentials: "include",
-        }
-      );
-      if (response.ok) {
-        setLocationForm({
-          name: "",
-          latitude: "",
-          longitude: "",
-          radius_meters: "",
-        });
-        fetchLocations();
-      }
-    } catch (err) {
-      setError("ไม่สามารถเพิ่มสถานที่ได้");
+      await fetch(`${import.meta.env.VITE_ENDPOINT}/api/location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(locationForm),
+      });
+      fetchLocations();
     } finally {
       setLoading(false);
     }
@@ -211,7 +241,7 @@ export default function Admin() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(editingLocation),
           credentials: "include",
-        }
+        },
       );
       if (response.ok) {
         setEditingLocation(null);
@@ -219,28 +249,6 @@ export default function Admin() {
       }
     } catch (err) {
       setError("ไม่สามารถแก้ไขสถานที่ได้");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteLocation = async (id: number) => {
-    if (!confirm("แน่ใจ?")) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_ENDPOINT}/api/location/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-      if (response.ok) {
-        fetchLocations();
-      }
-    } catch (err) {
-      setError("ไม่สามารถลบสถานที่ได้");
     } finally {
       setLoading(false);
     }
@@ -256,7 +264,7 @@ export default function Admin() {
         {
           method: "DELETE",
           credentials: "include",
-        }
+        },
       );
       if (response.ok) {
         fetchLocations();
@@ -268,44 +276,34 @@ export default function Admin() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("th-TH");
+  const handleDeleteLocation = async (id: number): Promise<void> => {
+    if (!confirm("แน่ใจ?")) return;
+    await fetch(`${import.meta.env.VITE_ENDPOINT}/api/location/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    fetchLocations();
   };
 
-  const formatHours = (hours: number) => {
+  const handleLogout = async (): Promise<void> => {
+    await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/logout`, {
+      method: "POST",
+    });
+    navi("/login");
+  };
+
+  /* ===================== HELPERS ===================== */
+
+  const formatDate = (date: string): string =>
+    new Date(date).toLocaleString("th-TH");
+
+  const formatHours = (hours: number): string => {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
     return `${h} ชม. ${m} นาที`;
   };
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_ENDPOINT}/api/auth/me`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error("Unauthorized");
-        }
-
-        const data = await res.json();
-        setUser(data);
-        console.log("auth user:", data);
-      } catch (err) {
-        console.error(err);
-        navi("/login", { replace: true });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [navi]);
+  /* ===================== UI ===================== */
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
