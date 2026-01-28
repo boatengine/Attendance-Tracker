@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
-import Admin from "./pages/admin/Admin.tsx";
+import Admin from "./pages/admin/Home";
 
 const router = createBrowserRouter([
   {
