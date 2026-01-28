@@ -16,7 +16,7 @@ export const clock = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT * FROM attendance_records 
        WHERE employee_id = ? AND session_type = ? AND date = ?`,
-      [id, session_type, today]
+      [id, session_type, today],
     );
 
     // clock in
@@ -24,12 +24,12 @@ export const clock = async (req, res) => {
       if (rows.length > 0 && rows[0].clock_in) {
         return res.status(400).json({ message: "already clocked_in" });
       }
-
+      const xx1 = `${location.lat},${location.lng}`;
       await pool.query(
         `INSERT INTO attendance_records
-        ( auth_location_id, employee_id, session_type, date, clock_in, clock_in_location, face_in,clock_in_verified )
+        ( auth_location_id, employee_id, session_type, date, clock_in, clock_in_location, face_in, clock_in_verified )
         VALUES (?, ?, ?, ?, NOW(), ?, ?, ?)`,
-        [auth_location_id, id, session_type, today, location, face_data, "true"]
+        [auth_location_id, id, session_type, today, xx1, face_data, "true"],
       );
 
       return res.json({ message: "clock in success" });
@@ -52,7 +52,7 @@ export const clock = async (req, res) => {
              face_out = ?,
             clock_out_verified = ?
          WHERE id = ?`,
-        [location, face_data, "true", rows[0].id]
+        [location, face_data, "true", rows[0].id],
       );
 
       return res.json({ message: "clock out success" });
@@ -82,7 +82,7 @@ export const getAttendanceStatus = async (req, res) => {
        WHERE employee_id = ?
          AND date = ?
        ORDER BY session_type`,
-      [id, today]
+      [id, today],
     );
 
     return res.json({
